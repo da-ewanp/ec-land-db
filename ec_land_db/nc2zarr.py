@@ -3,7 +3,8 @@ import argparse
 import logging
 
 import xarray as xr
-from utils import update_longitude
+
+from ec_land_db.xr_utils import update_longitude
 
 logging.basicConfig(level=logging.INFO)
 

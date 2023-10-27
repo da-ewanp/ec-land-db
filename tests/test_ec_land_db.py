@@ -3,7 +3,7 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 from ec_land_db.grib2zarr import preprocess_fc_grib, preprocess_an_grib
-from ec_land_db.utils import update_longitude
+from ec_land_db.xr_utils import update_longitude
 
 
 @pytest.fixture
