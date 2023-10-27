@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "x"
+    ],
+    "coordinates": "lon lat",
+    "long_name": "Downward shortwave radiation",
+    "units": "W/m2"
+}

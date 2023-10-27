@@ -1,0 +1,10 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "x"
+    ],
+    "comment": "not used",
+    "coordinates": "lat lon",
+    "long_name": "Surface roughness",
+    "units": "-"
+}

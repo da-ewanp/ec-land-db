@@ -2,13 +2,11 @@
 import argparse
 import logging
 
-import numpy as np
 import xarray as xr
+from utils import update_longitude
 
 logging.basicConfig(level=logging.INFO)
 
-TIMESTEP = "6H"
-CLIM_FILE = "/home/daep/projects/ec_land_db/ec_land_db/scratch/surfclim_399_l4"
 CLIM_FEATS = [
     "z0m",
     "geopot",
@@ -23,30 +21,6 @@ CLIM_FEATS = [
     "Ctype",
     "CLAKE",
 ]
-FC_GLOB_PATTERNS = [
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_fc_*.grb",
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20191231_fc_*.grb",
-]
-AN_GLOB_PATTERNS = [
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_soil_*.grb",
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_snow_*.grb",
-]
-OUTPUT_FNAME = "/ec/res4/scratch/daep/ec_training_db_out/test.zarr"
-
-
-def update_longitude(ds: xr.Dataset) -> xr.Dataset:
-    """rescale the longitude values of an xr.Dataset from (0, 360) to (-180, 180)
-
-    :param ds: dataset with longitude coordinate
-    :return: dataset with rescaled longitude coordinate
-    """
-    if "lon" not in ds.variables:
-        ds = ds.rename({"latitude": "lat", "longitude": "lon"})
-    ds = ds.assign_coords(lon=(((ds.lon + 180) % 360) - 180))
-    ds.lon.attrs["units"] = "degrees_east"
-    ds.lon.attrs["long_name"] = "longitude"
-    ds.lon.attrs["standard_name"] = "longitude"
-    return ds
 
 
 if __name__ == "__main__":
@@ -75,7 +49,12 @@ if __name__ == "__main__":
         "Selecting requested climatological features and inflating time dimension..."
     )
     ds = xr.open_mfdataset(args["nc_glob_pattern"], engine="netcdf4", combine="nested")
-    ds = update_longitude(ds.set_coords(["lat", "lon"])).isel(time=slice(0,-1)).resample(time=TIMESTEP).mean()
+    ds = (
+        update_longitude(ds.set_coords(["lat", "lon"]))
+        .isel(time=slice(0, -1))
+        .resample(time=args["model_timestep"])
+        .mean()
+    )
 
     logging.info(f"Merging Datasets and saving to Zarr {args['output_filename']}...")
     ds = ds[sorted(ds.variables)].chunk({"x": -1, "time": -1})

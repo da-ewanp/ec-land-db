@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "x"
+    ],
+    "coordinates": "lat lon",
+    "long_name": "Geopotential (at the surface = orography)",
+    "units": "\"m**2 s**-2\""
+}

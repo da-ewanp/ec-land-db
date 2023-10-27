@@ -175,13 +175,12 @@ if [[ $LUSECtpf = true ]]; then
   ncks -A -v Ctpf Ctpf_"${DATELABEL}".nc Rainf_"${DATELABEL}".nc 
 fi 
 
-python3 /home/daep/projects/ec-land-db/src/nc2zarr.py \
+python3 /home/daep/projects/ec_land_db/ec_land_db/nc2zarr.py \
         -nc "*.nc" \
         -out "${OUTPUT}/ecland_era5forcing_${DATELABEL}.zarr" \
         -tstep "6H"
 
 rm ./*.nc
 rm ./*.grb*
-#mv ./*.nc ${OUTPUT}/
 cd "$OUTPUT" || exit
 rmdir "$WDIR"

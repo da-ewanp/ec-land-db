@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "x"
+    ],
+    "coordinates": "lat lon",
+    "long_name": "C3/C4 photosynthesis pathway",
+    "units": "-"
+}

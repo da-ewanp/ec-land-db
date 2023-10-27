@@ -1,0 +1,9 @@
+{
+    "_ARRAY_DIMENSIONS": [
+        "time",
+        "x"
+    ],
+    "coordinates": "lat lon",
+    "long_name": "hight vegetation cover",
+    "units": "-"
+}

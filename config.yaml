@@ -1,6 +1,7 @@
 expver: "i6aj"
-start_date: "20190101"
-end_date: "20191201"
+start_date: "20181201"
+end_date: "20181201"
 climfile: "/home/daep/projects/ec_land_db/ec_land_db/scratch/surfclim_399_l4"
-output_dir: "/ec/res4/scratch/daep/ec_training_db_out/"
+output_dir: "/ec/res4/scratch/daep/ec_training_db_out"
 grid: "O400"
+time_chunk_size: 10

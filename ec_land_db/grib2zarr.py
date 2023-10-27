@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 import argparse
 import logging
+from typing import Union
 
 import numpy as np
 import xarray as xr
+from utils import update_longitude
 
 logging.basicConfig(level=logging.INFO)
 
-TIMESTEP = "6H"
-CLIM_FILE = "/home/daep/projects/ec_land_db/ec_land_db/scratch/surfclim_399_l4"
 CLIM_FEATS = [
     "z0m",
     "geopot",
@@ -23,51 +23,64 @@ CLIM_FEATS = [
     "Ctype",
     "CLAKE",
 ]
-FC_GLOB_PATTERNS = [
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_fc_*.grb",
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20191231_fc_*.grb",
-]
-AN_GLOB_PATTERNS = [
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_soil_*.grb",
-    "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_snow_*.grb",
-]
-OUTPUT_FNAME = "/ec/res4/scratch/daep/ec_training_db_out/test.zarr"
-
-
-def update_longitude(ds: xr.Dataset) -> xr.Dataset:
-    """rescale the longitude values of an xr.Dataset from (0, 360) to (-180, 180)
-
-    :param ds: dataset with longitude coordinate
-    :return: dataset with rescaled longitude coordinate
-    """
-    if "lon" not in ds.variables:
-        ds = ds.rename({"latitude": "lat", "longitude": "lon"})
-    ds = ds.assign_coords(lon=(((ds.lon + 180) % 360) - 180))
-    ds.lon.attrs["units"] = "degrees_east"
-    ds.lon.attrs["long_name"] = "longitude"
-    ds.lon.attrs["standard_name"] = "longitude"
-    return ds
 
 
 def open_surfclim(clim_path: str) -> xr.Dataset:
+    """Opens a ec-land climatological file using decode_times=False as times stored as "month"
+
+    :param clim_path: path to ec-land climatological fields file
+    :return: dataset of climatological fields
+    """
     ds_clim = update_longitude(xr.open_dataset(clim_path, decode_times=False))
     return ds_clim
 
 
 def preprocess_fc_grib(ds: xr.Dataset) -> xr.Dataset:
+    """preprocess 'fc' type dataset, dropping unused dimensions and formatting time dimension
+
+    :param ds: fc-type dataset
+    :return: processed dataset
+    """
     drop_lst = list(ds.coords)
     for dim in ["latitude", "longitude", "step"]:
         if dim in drop_lst:
             drop_lst.remove(dim)
     time_arr = ds.valid_time.values
-    ds = ds.drop(drop_lst).rename({"step": "time", "values": "x"})
+    ds = ds.drop_vars(drop_lst).rename({"step": "time", "values": "x"})
     ds["time"] = time_arr
     if "time" not in list(ds.dims.keys()):
         ds = ds.expand_dims({"time": [ds.time.values]})
     return update_longitude(ds)
 
 
-def open_grib_fc(fc_glob: str, idx_arr: [np.ndarray, None] = None) -> xr.Dataset:
+def preprocess_an_grib(ds: xr.Dataset) -> xr.Dataset:
+    """preprocess 'fc' type dataset, dropping unused dimensions, formatting time dimension
+    and flattening any additional dimensions outside of 'time' and 'x'.
+
+    :param ds: an-type dataset
+    :return: processed dataset
+    """
+    drop_lst = list(ds.drop_vars(["latitude", "longitude", "time"]).coords)
+    dims_lst = list(ds.dims.keys())
+    dim_layer_idx = np.where(["layer" in x.lower() for x in dims_lst])[0]
+    if len(dim_layer_idx) == 1:
+        datavars_lst = list(ds.data_vars)
+        layer_dim = dims_lst[dim_layer_idx[0]]
+        for layer in ds[layer_dim].values:
+            for var in datavars_lst:
+                ds[f"{var}_l{int(layer)}"] = ds[var].sel({layer_dim: int(layer)})
+        ds = ds.drop_vars(datavars_lst)
+    return update_longitude(ds.drop_vars(drop_lst).rename({"values": "x"}))
+
+
+def open_grib_fc(fc_glob: str, idx_arr: Union[np.ndarray, None] = None) -> xr.Dataset:
+    """Opens multiple fc-type grib files for a given glob pattern and creates a processed N-d labelled
+    xarray dataset
+
+    :param fc_glob: glob pattern for fc-type grib files to open
+    :param idx_arr: index array to select subset of points in space, defaults to None
+    :return: processed dataset
+    """
     ds_fc = xr.open_mfdataset(
         fc_glob,  # "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_fc_*.grb",
         engine="cfgrib",
@@ -82,24 +95,21 @@ def open_grib_fc(fc_glob: str, idx_arr: [np.ndarray, None] = None) -> xr.Dataset
 
 
 def open_grib_an(an_glob: str, idx_arr: [np.ndarray, None] = None) -> xr.Dataset:
+    """Opens multiple an-type grib files for a given glob pattern and creates a processed N-d labelled
+    xarray dataset
+
+    :param an_glob: glob pattern for an-type grib files to open
+    :param idx_arr: index array to select subset of points in space, defaults to None
+    :return: processed dataset
+    """
     ds_an = xr.open_mfdataset(
         an_glob,  # "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_soil_*.grb",
         engine="cfgrib",
         combine="nested",
         compat="override",
+        preprocess=preprocess_an_grib,
         parallel=True,
     )
-    drop_lst = list(ds_an.drop(["latitude", "longitude", "time"]).coords)
-    dims_lst = list(ds_an.dims.keys())
-    dim_layer_idx = np.where(["layer" in x.lower() for x in dims_lst])[0]
-    if len(dim_layer_idx) == 1:
-        datavars_lst = list(ds_an.data_vars)
-        layer_dim = dims_lst[dim_layer_idx[0]]
-        for layer in ds_an[layer_dim].values:
-            for var in datavars_lst:
-                ds_an[f"{var}_l{int(layer)}"] = ds_an[var].sel({layer_dim: int(layer)})
-        ds_an = ds_an.drop(datavars_lst)
-    ds_an = update_longitude(ds_an.drop(drop_lst).rename({"values": "x"}))
     if idx_arr is not None:
         ds_an = ds_an.isel(x=idx_arr)
     return ds_an
