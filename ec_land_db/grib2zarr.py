@@ -5,8 +5,7 @@ from typing import Union
 
 import numpy as np
 import xarray as xr
-
-from ec_land_db.xr_utils import update_longitude
+from utils import update_longitude
 
 logging.basicConfig(level=logging.INFO)
 
@@ -83,10 +82,9 @@ def open_grib_fc(fc_glob: str, idx_arr: Union[np.ndarray, None] = None) -> xr.Da
     :return: processed dataset
     """
     ds_fc = xr.open_mfdataset(
-        fc_glob,  # "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_fc_*.grb",
+        fc_glob,  # e.g. "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_fc_*.grb",
         engine="cfgrib",
         combine="nested",
-        # compat="override",
         preprocess=preprocess_fc_grib,
         parallel=True,
     )
@@ -104,7 +102,7 @@ def open_grib_an(an_glob: str, idx_arr: [np.ndarray, None] = None) -> xr.Dataset
     :return: processed dataset
     """
     ds_an = xr.open_mfdataset(
-        an_glob,  # "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_soil_*.grb",
+        an_glob,  # e.g. "/ec/res4/scratch/daep/ec_training_db_out/i6aj_20200101_soil_*.grb",
         engine="cfgrib",
         combine="nested",
         compat="override",

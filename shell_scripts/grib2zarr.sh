@@ -24,4 +24,4 @@ python3 ../ec_land_db/grib2zarr.py \
         -clim "$CLIMFILE" \
         -tstep "6H"
 
-# rm "${OUTDIR}"/"${EXPVER}"_"${DATE}"_fc_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE_PREV_MONTH}"_fc_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE}"_soil_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE}"_snow_*.grb*
+rm "${OUTDIR}"/"${EXPVER}"_"${DATE}"_fc_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE_PREV_MONTH}"_fc_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE}"_soil_*.grb* "${OUTDIR}"/"${EXPVER}"_"${DATE}"_snow_*.grb*

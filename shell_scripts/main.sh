@@ -17,10 +17,12 @@ function parse_yaml {
    }'
 }
 
+# Load config parameters from yaml file
 eval "$(parse_yaml ../config.yaml "conf_")"
 printf "Loaded yaml config with:%s\n$(parse_yaml ../config.yaml)%s\n"
 
-sbatch mars_stage_i6aj.sh "$conf_start_date" "$conf_end_date" "$conf_output_dir" "$conf_expver" "$conf_grid"
+# Stage Mars data to be downloaded
+sbatch mars_stage.sh "$conf_start_date" "$conf_end_date" "$conf_output_dir" "$conf_expver" "$conf_grid"
 
 # Loop through and extract ec-land ERA5 forcing and convert to Zarr
 i="$conf_start_date"
@@ -36,7 +38,7 @@ i="$conf_start_date"
 while [[ $(date +%s -d "$i") -le $(date +%s -d "$conf_end_date") ]];
     do
     echo "Running Mars extraction and zarr conversion for ${i}..."
-    ./mars_req_i6aj.sh "$i" "$conf_output_dir" "$conf_expver" "$conf_grid"
+    ./mars_req.sh "$i" "$conf_output_dir" "$conf_expver" "$conf_grid"
     sbatch grib2zarr.sh "$conf_output_dir" "$i" "$conf_expver" "$conf_climfile"
     i=$(date -d "$i + 1 month" +%Y%m%d)
 done

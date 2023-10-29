@@ -56,7 +56,10 @@ def mock_an_dataset():
             ),
         },
         coords={
-            "time": [pd.to_datetime("2018-12-01"), pd.to_datetime("2018-12-01T01:00:00")],
+            "time": [
+                pd.to_datetime("2018-12-01"),
+                pd.to_datetime("2018-12-01T01:00:00"),
+            ],
             "step": pd.Timedelta("0 hours"),
             "snowLayer": [1.0, 2.0],
             "latitude": [72.52, 72.52],

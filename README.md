@@ -18,11 +18,17 @@ The `src/nc2zarr.py` file converts netcdf files to Zarr using the `config.yaml` 
 
 ```mermaid
   graph TD;
-      A[MARS download of ec-land data to GRIB]; 
-      A-- grib -->C[grib2zarr.py: Process file 1 to Zarr];
-      A-- grib -->D[...];
-      A-- grib -->E[grib2zarr.py: Process file N to Zarr];
-      C-- zarr -->F[create_zarr_store.py: Create single Zarr-Store];
+      H[shell_scripts/main.sh];
+      H--> A1;
+      H--> A2;
+      H--> A3;
+      A1[mars_req.sh: download of ec-land\n model data month 1 to GRIB];
+      A2[...]; 
+      A3[mars_req.sh: download of ec-land\n model data month N to GRIB];
+      A1-- grib -->C[grib2zarr.py:\n Process file month 1 to Zarr];
+      A2-- grib -->D[...];
+      A3-- grib -->E[grib2zarr.py:\n Process file month N to Zarr];
+      C-- zarr -->F[create_zarr_store.ipynb: Create single Zarr-Store];
       D-- zarr -->F;
       E-- zarr -->F;
 ```

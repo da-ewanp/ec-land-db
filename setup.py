@@ -17,5 +17,6 @@ setup(
                       "distributed==2023.1.1",
                       "bokeh==2.4.3",
                       "xarray==2023.1.0",
+                      "py-xgboost==1.7.6",
                       "zarr==2.13.6"],
 )
