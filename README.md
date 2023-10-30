@@ -29,9 +29,11 @@ The `ec_land_db/nc2zarr.py` file converts netcdf files to Zarr. Here we are extr
 
 ### Concatenating to single Zarr-Store
 
-Once we have extracted an processed the monthly ec-land model output we can then concatenate this into a single zarr-Store with a chunking strategy as defined in the `config.yaml`. We show the steps for this in the notebook:
+Once we have extracted an processed the monthly ec-land model output we can then concatenate this into a single Zarr-Store with a chunking strategy as defined in the `config.yaml`. Here we use the `dask-jobqueue` `SLURMCluster` to create a large Dask cluster for rechunking and saving our consolidated Zarr-Store. We show the steps for this in the notebook:
 
 [notebooks/create_zarr_store.ipynb](notebooks/create_zarr_store.ipynb "Concatenating Zarr-Store")
+
+![Dask Dashboard](docs/images/dask_dashboard.gif "Dask Dashboard")
 
 ### Exploring the database
 
