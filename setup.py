@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="ec_land_db",
+    name="ec-land-db",
     version="0.0.1",
     author="Ewan Pinnington",
     author_email="ewan.pinnington@ecmwf.int",
