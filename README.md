@@ -33,6 +33,12 @@ Once we have extracted an processed the monthly ec-land model output we can then
 
 [notebooks/create_zarr_store.ipynb](notebooks/create_zarr_store.ipynb "Concatenating Zarr-Store")
 
+### Exploring the database
+
+With the large ML database created we can inspect and plot different features/variables. We give some examples of this with `xarray` in the notebook:
+
+[notebooks/explore_database_example.ipynb](notebooks/explore_database_example.ipynb "Database inspection")
+
 ### Example data processing workflow
 
 ```mermaid
